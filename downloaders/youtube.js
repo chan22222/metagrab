@@ -43,7 +43,6 @@ class YouTubeDownloader {
                 dumpSingleJson: true,
                 noCheckCertificates: true,
                 noWarnings: true,
-                preferFreeFormats: true,
             };
 
             // 쿠키 파일이 있으면 사용
