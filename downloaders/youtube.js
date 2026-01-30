@@ -1,55 +1,57 @@
 const ytdlp = require('yt-dlp-exec');
-const path = require('path');
 const fs = require('fs');
+const path = require('path');
+const supabase = require('../services/supabase');
 
 class YouTubeDownloader {
-    // Supabase에서 쿠키를 가져와서 Netscape 파일로 변환
-    async prepareCookiesFile() {
+    convertJsonToNetscape(jsonStr) {
         try {
-            const supabase = require('../services/supabase');
-            if (!supabase.enabled) return null;
+            const cookies = JSON.parse(jsonStr);
+            if (!Array.isArray(cookies)) return null;
 
-            const cookieData = await supabase.getSession('youtube_cookie');
-            if (!cookieData) return null;
-
-            const cookiesPath = path.join(__dirname, '..', 'youtube_cookies.txt');
-            const trimmed = cookieData.trim();
-
-            let netscapeContent;
-
-            // 이미 Netscape 형식인지 확인
-            if (trimmed.startsWith('# Netscape') || trimmed.startsWith('# HTTP Cookie')) {
-                netscapeContent = trimmed;
-            } else {
-                // JSON 배열 형식 시도
-                try {
-                    let cookieArray = JSON.parse(trimmed);
-                    if (!Array.isArray(cookieArray)) cookieArray = [cookieArray];
-
-                    const lines = ['# Netscape HTTP Cookie File', ''];
-                    for (const c of cookieArray) {
-                        const domain = c.domain || '.youtube.com';
-                        const flag = domain.startsWith('.') ? 'TRUE' : 'FALSE';
-                        const p = c.path || '/';
-                        const secure = c.secure ? 'TRUE' : 'FALSE';
-                        const expiry = c.expirationDate ? Math.floor(c.expirationDate) : (c.expiry || 0);
-                        if (c.name) {
-                            lines.push(`${domain}\t${flag}\t${p}\t${secure}\t${expiry}\t${c.name}\t${c.value || ''}`);
-                        }
-                    }
-                    netscapeContent = lines.join('\n');
-                } catch {
-                    // 탭 구분 Netscape 형식 (헤더 없음)
-                    netscapeContent = '# Netscape HTTP Cookie File\n\n' + trimmed;
+            const lines = ['# Netscape HTTP Cookie File'];
+            for (const c of cookies) {
+                const domain = c.domain || '.youtube.com';
+                const flag = domain.startsWith('.') ? 'TRUE' : 'FALSE';
+                const path = c.path || '/';
+                const secure = c.secure ? 'TRUE' : 'FALSE';
+                const expiry = c.expirationDate ? Math.floor(c.expirationDate) : '0';
+                const name = c.name;
+                const value = c.value;
+                if (name && value) {
+                    lines.push(`${domain}\t${flag}\t${path}\t${secure}\t${expiry}\t${name}\t${value}`);
                 }
             }
-
-            fs.writeFileSync(cookiesPath, netscapeContent);
-            return cookiesPath;
-        } catch (e) {
-            console.error('[YouTube] 쿠키 파일 준비 실패:', e.message);
+            return lines.join('\n');
+        } catch {
             return null;
         }
+    }
+
+    async getCookiesPath() {
+        const cookiesPath = path.join(__dirname, '..', 'youtube_cookies.txt');
+
+        if (fs.existsSync(cookiesPath)) {
+            const content = fs.readFileSync(cookiesPath, 'utf8').trim();
+            if (content.startsWith('[')) {
+                const netscape = this.convertJsonToNetscape(content);
+                if (netscape) {
+                    fs.writeFileSync(cookiesPath, netscape, 'utf8');
+                }
+            }
+            return cookiesPath;
+        }
+
+        if (supabase.enabled) {
+            const cookie = await supabase.getSession('youtube_cookie');
+            if (cookie) {
+                const netscape = this.convertJsonToNetscape(cookie);
+                fs.writeFileSync(cookiesPath, netscape || cookie, 'utf8');
+                return cookiesPath;
+            }
+        }
+
+        return null;
     }
 
     extractVideoId(url) {
@@ -80,40 +82,33 @@ class YouTubeDownloader {
         try {
             const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-            // Supabase에서 쿠키 파일 준비
-            const cookiesPath = await this.prepareCookiesFile();
+            // yt-dlp 버전 확인
+            try {
+                const ver = await ytdlp('--version');
+                console.log('[YouTube] yt-dlp 버전:', ver.toString().trim());
+            } catch {}
 
+            // yt-dlp로 정보 가져오기
             const baseOptions = {
                 dumpSingleJson: true,
                 noCheckCertificates: true,
                 noWarnings: true,
+                skipDownload: true,
             };
 
-            if (cookiesPath) {
-                baseOptions.cookies = cookiesPath;
-                console.log('[YouTube] 쿠키 사용');
-            }
-
-            // 포맷 에러 대비 재시도 로직
+            const cookiesPath = await this.getCookiesPath();
             let info;
-            const formatAttempts = [
-                {},                        // 기본 (yt-dlp 자동 선택)
-                { format: 'b' },           // best single file
-                { format: '18' },          // 360p mp4 (거의 항상 존재)
-            ];
 
-            for (let i = 0; i < formatAttempts.length; i++) {
+            if (cookiesPath) {
                 try {
-                    const options = { ...baseOptions, ...formatAttempts[i] };
-                    if (i > 0) {
-                        console.log(`[YouTube] 재시도 ${i}: format=${formatAttempts[i].format}`);
-                    }
-                    info = await ytdlp(videoUrl, options);
-                    break;
-                } catch (err) {
-                    if (i === formatAttempts.length - 1) throw err;
-                    console.log(`[YouTube] 시도 ${i + 1} 실패: ${err.message?.substring(0, 100)}`);
+                    console.log('[YouTube] 쿠키로 시도...');
+                    info = await ytdlp(videoUrl, { ...baseOptions, cookies: cookiesPath });
+                } catch (cookieErr) {
+                    console.log('[YouTube] 쿠키 실패, 쿠키 없이 재시도:', cookieErr.message?.split('\n')[0]);
+                    info = await ytdlp(videoUrl, baseOptions);
                 }
+            } else {
+                info = await ytdlp(videoUrl, baseOptions);
             }
 
             console.log(`[YouTube] 제목: ${info.title}`);
