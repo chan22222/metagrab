@@ -3,13 +3,55 @@ const path = require('path');
 const fs = require('fs');
 
 class YouTubeDownloader {
-    getCookiesPath() {
-        const cookiesPath = path.join(__dirname, '..', 'youtube_cookies.txt');
-        if (fs.existsSync(cookiesPath)) {
+    // Supabase에서 쿠키를 가져와서 Netscape 파일로 변환
+    async prepareCookiesFile() {
+        try {
+            const supabase = require('../services/supabase');
+            if (!supabase.enabled) return null;
+
+            const cookieData = await supabase.getSession('youtube_cookie');
+            if (!cookieData) return null;
+
+            const cookiesPath = path.join(__dirname, '..', 'youtube_cookies.txt');
+            const trimmed = cookieData.trim();
+
+            let netscapeContent;
+
+            // 이미 Netscape 형식인지 확인
+            if (trimmed.startsWith('# Netscape') || trimmed.startsWith('# HTTP Cookie')) {
+                netscapeContent = trimmed;
+            } else {
+                // JSON 배열 형식 시도
+                try {
+                    let cookieArray = JSON.parse(trimmed);
+                    if (!Array.isArray(cookieArray)) cookieArray = [cookieArray];
+
+                    const lines = ['# Netscape HTTP Cookie File', ''];
+                    for (const c of cookieArray) {
+                        const domain = c.domain || '.youtube.com';
+                        const flag = domain.startsWith('.') ? 'TRUE' : 'FALSE';
+                        const p = c.path || '/';
+                        const secure = c.secure ? 'TRUE' : 'FALSE';
+                        const expiry = c.expirationDate ? Math.floor(c.expirationDate) : (c.expiry || 0);
+                        if (c.name) {
+                            lines.push(`${domain}\t${flag}\t${p}\t${secure}\t${expiry}\t${c.name}\t${c.value || ''}`);
+                        }
+                    }
+                    netscapeContent = lines.join('\n');
+                } catch {
+                    // 탭 구분 Netscape 형식 (헤더 없음)
+                    netscapeContent = '# Netscape HTTP Cookie File\n\n' + trimmed;
+                }
+            }
+
+            fs.writeFileSync(cookiesPath, netscapeContent);
             return cookiesPath;
+        } catch (e) {
+            console.error('[YouTube] 쿠키 파일 준비 실패:', e.message);
+            return null;
         }
-        return null;
     }
+
     extractVideoId(url) {
         const patterns = [
             /youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})/,
@@ -38,7 +80,9 @@ class YouTubeDownloader {
         try {
             const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-            // yt-dlp 옵션
+            // Supabase에서 쿠키 파일 준비
+            const cookiesPath = await this.prepareCookiesFile();
+
             const ytdlpOptions = {
                 dumpSingleJson: true,
                 noCheckCertificates: true,
@@ -47,11 +91,9 @@ class YouTubeDownloader {
                 preferFreeFormats: true,
             };
 
-            // 쿠키 파일이 있으면 사용
-            const cookiesPath = this.getCookiesPath();
             if (cookiesPath) {
                 ytdlpOptions.cookies = cookiesPath;
-                console.log('[YouTube] 쿠키 파일 사용:', cookiesPath);
+                console.log('[YouTube] 쿠키 사용');
             }
 
             const info = await ytdlp(videoUrl, ytdlpOptions);
