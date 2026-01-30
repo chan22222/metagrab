@@ -38,41 +38,23 @@ class YouTubeDownloader {
         try {
             const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-            // 쿠키 파일 확인
+            // yt-dlp 옵션
+            const ytdlpOptions = {
+                dumpSingleJson: true,
+                noCheckCertificates: true,
+                noWarnings: true,
+                noCheckFormats: true,
+                preferFreeFormats: true,
+            };
+
+            // 쿠키 파일이 있으면 사용
             const cookiesPath = this.getCookiesPath();
             if (cookiesPath) {
+                ytdlpOptions.cookies = cookiesPath;
                 console.log('[YouTube] 쿠키 파일 사용:', cookiesPath);
             }
 
-            // 여러 포맷 옵션으로 시도
-            const formatAttempts = [null, 'b', '18'];
-            let info = null;
-
-            for (const fmt of formatAttempts) {
-                try {
-                    const opts = {
-                        dumpSingleJson: true,
-                        noCheckCertificates: true,
-                        noWarnings: true,
-                    };
-                    if (fmt) opts.format = fmt;
-                    if (cookiesPath) opts.cookies = cookiesPath;
-
-                    console.log(`[YouTube] 시도 (format: ${fmt || 'default'})...`);
-                    info = await ytdlp(videoUrl, opts);
-                    break;
-                } catch (e) {
-                    console.log(`[YouTube] format=${fmt || 'default'} 실패: ${e.message.split('\n')[0]}`);
-                    if (!e.message.includes('format') && !e.message.includes('Format')) {
-                        throw e;
-                    }
-                }
-            }
-
-            if (!info) {
-                console.log('[YouTube] 모든 포맷 시도 실패');
-                return null;
-            }
+            const info = await ytdlp(videoUrl, ytdlpOptions);
 
             console.log(`[YouTube] 제목: ${info.title}`);
 
