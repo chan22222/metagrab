@@ -1,5 +1,6 @@
 node_modules/
 instagram_cookies.json
+youtube_cookies.txt
 downloads/
 temp/
 *.log

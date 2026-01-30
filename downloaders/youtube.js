@@ -1,6 +1,15 @@
 const ytdlp = require('yt-dlp-exec');
+const path = require('path');
+const fs = require('fs');
 
 class YouTubeDownloader {
+    getCookiesPath() {
+        const cookiesPath = path.join(__dirname, '..', 'youtube_cookies.txt');
+        if (fs.existsSync(cookiesPath)) {
+            return cookiesPath;
+        }
+        return null;
+    }
     extractVideoId(url) {
         const patterns = [
             /youtube\.com\/watch\?v=([A-Za-z0-9_-]{11})/,
@@ -29,13 +38,22 @@ class YouTubeDownloader {
         try {
             const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
 
-            // yt-dlp로 정보 가져오기
-            const info = await ytdlp(videoUrl, {
+            // yt-dlp 옵션
+            const ytdlpOptions = {
                 dumpSingleJson: true,
                 noCheckCertificates: true,
                 noWarnings: true,
                 preferFreeFormats: true,
-            });
+            };
+
+            // 쿠키 파일이 있으면 사용
+            const cookiesPath = this.getCookiesPath();
+            if (cookiesPath) {
+                ytdlpOptions.cookies = cookiesPath;
+                console.log('[YouTube] 쿠키 파일 사용:', cookiesPath);
+            }
+
+            const info = await ytdlp(videoUrl, ytdlpOptions);
 
             console.log(`[YouTube] 제목: ${info.title}`);
 

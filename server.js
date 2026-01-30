@@ -101,6 +101,49 @@ app.post('/api/extract', async (req, res) => {
     }
 });
 
+// YouTube 쿠키 저장 API (Netscape 형식)
+app.post('/api/youtube/cookie', async (req, res) => {
+    const { cookies } = req.body;
+
+    if (!cookies) {
+        return res.status(400).json({ error: '쿠키 데이터가 필요합니다' });
+    }
+
+    try {
+        // Netscape 형식 쿠키를 파일로 저장
+        const cookiesPath = path.join(__dirname, 'youtube_cookies.txt');
+        let cookieContent = cookies.trim();
+
+        // Netscape 헤더가 없으면 추가
+        if (!cookieContent.startsWith('# Netscape') && !cookieContent.startsWith('# HTTP Cookie')) {
+            cookieContent = '# Netscape HTTP Cookie File\n# This file is generated automatically.\n\n' + cookieContent;
+        }
+
+        fs.writeFileSync(cookiesPath, cookieContent);
+
+        // Supabase에도 저장 (Railway 재시작 대비)
+        if (supabase.enabled) {
+            await supabase.setSession('youtube_cookies', cookieContent);
+        }
+
+        console.log('[Server] YouTube 쿠키 저장 완료');
+        return res.json({ success: true, message: 'YouTube 쿠키가 저장되었습니다!' });
+    } catch (error) {
+        console.error('YouTube 쿠키 저장 에러:', error);
+        return res.status(500).json({ error: '쿠키 저장 실패' });
+    }
+});
+
+// YouTube 쿠키 상태 확인
+app.get('/api/youtube/status', (req, res) => {
+    const cookiesPath = path.join(__dirname, 'youtube_cookies.txt');
+    const hasCookies = fs.existsSync(cookiesPath);
+    return res.json({
+        hasCookies,
+        message: hasCookies ? 'YouTube 쿠키가 설정되어 있습니다' : 'YouTube 쿠키가 없습니다'
+    });
+});
+
 // Instagram 쿠키 직접 저장 API
 app.post('/api/instagram/cookie', async (req, res) => {
     const { sessionid } = req.body;
@@ -327,6 +370,18 @@ async function initAPIKeyPool() {
         console.log(`[Server] OpenAI Whisper 활성화됨 (${count}개의 API 키)`);
     } else {
         console.log('[Server] OpenAI API 키가 없습니다. 웹에서 등록하세요.');
+    }
+
+    // Supabase에서 YouTube 쿠키 복원
+    if (supabase.enabled) {
+        const ytCookies = await supabase.getSession('youtube_cookies');
+        if (ytCookies) {
+            const cookiesPath = path.join(__dirname, 'youtube_cookies.txt');
+            if (!fs.existsSync(cookiesPath)) {
+                fs.writeFileSync(cookiesPath, ytCookies);
+                console.log('[Server] YouTube 쿠키 Supabase에서 복원됨');
+            }
+        }
     }
 }
 initAPIKeyPool();
