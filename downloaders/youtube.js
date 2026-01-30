@@ -43,13 +43,16 @@ class YouTubeDownloader {
                 dumpSingleJson: true,
                 noCheckCertificates: true,
                 noWarnings: true,
+                format: 'bv*+ba/b/best',
             };
 
             // 쿠키 파일이 있으면 사용
             const cookiesPath = this.getCookiesPath();
             if (cookiesPath) {
                 ytdlpOptions.cookies = cookiesPath;
-                console.log('[YouTube] 쿠키 파일 사용:', cookiesPath);
+                // 쿠키 파일 첫 2줄 디버깅
+                const cookiePreview = fs.readFileSync(cookiesPath, 'utf-8').split('\n').slice(0, 3).join(' | ');
+                console.log('[YouTube] 쿠키 파일 사용:', cookiesPath, '| 시작:', cookiePreview);
             }
 
             const info = await ytdlp(videoUrl, ytdlpOptions);
