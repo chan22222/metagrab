@@ -2147,10 +2147,19 @@
                     detailText = item.error || '건너뜀';
                 }
 
-                // 성공한 항목에 원본 보기 버튼 추가
-                const viewBtn = item.status === 'success' && item.originalTranscript
-                    ? `<button class="batch-item-view-btn" onclick="showBatchTranscriptModal(${index})">원본 보기</button>`
-                    : '';
+                let actionButtons = '';
+                if (item.status === 'success') {
+                    if (item.video_url) {
+                        actionButtons += `<button class="batch-item-action-btn batch-download-btn" onclick="downloadBatchItem(${index})" title="다운로드">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+                        </button>`;
+                    }
+                    if (item.transcript) {
+                        actionButtons += `<button class="batch-item-action-btn batch-transcript-btn" onclick="openBatchTranscriptModal(${index})" title="전사 보기">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+                        </button>`;
+                    }
+                }
 
                 container.innerHTML += `
                     <div class="batch-item">
@@ -2162,30 +2171,226 @@
                             <div class="batch-item-detail">${detailText}</div>
                         </div>
                         <div class="batch-item-actions">
-                            ${viewBtn}
+                            ${actionButtons}
                         </div>
                     </div>
                 `;
             });
         }
 
-        // 배치 결과 원본 텍스트 모달 표시
-        function showBatchTranscriptModal(index) {
-            console.log('[Debug] showBatchTranscriptModal index:', index);
-            console.log('[Debug] batchResultsData:', batchResultsData);
-            console.log('[Debug] batchResultsData[index]:', batchResultsData[index]);
+        // 배치 모달 상태 변수
+        let currentBatchModalIndex = -1;
+        let batchModalTranscript = '';
+        let batchModalOriginal = '';
+        let batchModalSummarized = false;
+        let batchModalTranslated = false;
+        let batchModalCorrected = false;
 
+        function openBatchTranscriptModal(index) {
             const item = batchResultsData[index];
-            if (!item) return;
+            if (!item || !item.transcript) return;
 
-            document.getElementById('batchModalTitle').textContent = item.title || '원본 전사 텍스트';
-            document.getElementById('batchModalOriginal').textContent = item.originalTranscript || '(없음)';
-            document.getElementById('batchModalGenerated').textContent = item.generatedScript || '(없음)';
+            currentBatchModalIndex = index;
+            batchModalTranscript = item.transcript;
+            batchModalOriginal = item.transcript;
+            batchModalSummarized = false;
+            batchModalTranslated = false;
+            batchModalCorrected = false;
+
+            document.getElementById('batchModalTitle').textContent = item.title || '전사 텍스트';
+            document.getElementById('batchModalContent').textContent = item.transcript;
+
+            const btnS = document.getElementById('batchBtnSummarize');
+            const btnT = document.getElementById('batchBtnTranslate');
+            const btnC = document.getElementById('batchBtnCorrect');
+            btnS.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 17H4v2h10v-2zm6-8H4v2h16V9zM4 15h16v-2H4v2zM4 5v2h16V5H4z"/></svg> 요약`;
+            btnS.style.cssText = '';
+            btnT.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg> 번역`;
+            btnT.style.cssText = '';
+            btnC.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg> GPT 교정`;
+            btnC.style.cssText = '';
+
             document.getElementById('batchTranscriptModal').classList.add('active');
         }
 
         function closeBatchTranscriptModal() {
             document.getElementById('batchTranscriptModal').classList.remove('active');
+        }
+
+        function downloadBatchItem(index) {
+            const item = batchResultsData[index];
+            if (!item || !item.video_url) return;
+
+            const filename = `${item.platform || 'video'}_${Date.now()}.mp4`;
+            const downloadUrl = `/api/proxy-download?url=${encodeURIComponent(item.video_url)}&filename=${encodeURIComponent(filename)}`;
+
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        async function batchSummarize() {
+            const btn = document.getElementById('batchBtnSummarize');
+            const content = document.getElementById('batchModalContent');
+
+            if (batchModalSummarized) {
+                const diffContent = document.getElementById('diffContent');
+                diffContent.innerHTML = `
+                    <div style="margin-bottom: 16px;">
+                        <div style="color: rgba(255,255,255,0.5); font-size: 0.8rem; margin-bottom: 8px;">원본:</div>
+                        <div style="background: rgba(0,0,0,0.2); padding: 12px; border-radius: 8px; font-size: 0.85rem; line-height: 1.8; max-height: 200px; overflow-y: auto;">${escapeHtml(batchModalOriginal)}</div>
+                    </div>
+                    <div>
+                        <div style="color: rgba(110,231,183,0.8); font-size: 0.8rem; margin-bottom: 8px;">요약:</div>
+                        <div style="background: rgba(110,231,183,0.1); padding: 12px; border-radius: 8px; font-size: 0.85rem; line-height: 1.8; border: 1px solid rgba(110,231,183,0.2);">${escapeHtml(batchModalTranscript)}</div>
+                    </div>
+                `;
+                document.getElementById('diffModal').style.display = 'flex';
+                return;
+            }
+
+            if (!batchModalTranscript) return;
+            if (new TextEncoder().encode(batchModalTranscript).length < 1000) {
+                alert('텍스트가 너무 짧아 요약이 필요하지 않습니다.');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0;"></div>';
+
+            try {
+                const response = await fetch('/api/summarize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: batchModalTranscript })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    batchModalTranscript = data.summarized;
+                    content.textContent = data.summarized;
+                    batchModalSummarized = true;
+                    btn.innerHTML = '요약 전/후';
+                    btn.style.background = 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.2))';
+                    btn.style.borderColor = 'rgba(16,185,129,0.3)';
+                    btn.style.color = '#6ee7b7';
+                } else {
+                    alert(data.error || '요약 실패');
+                    btn.innerHTML = '요약';
+                }
+            } catch (error) {
+                alert('요약 중 오류가 발생했습니다.');
+                btn.innerHTML = '요약';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function batchTranslate() {
+            const btn = document.getElementById('batchBtnTranslate');
+            const content = document.getElementById('batchModalContent');
+
+            if (batchModalTranslated) {
+                const diffContent = document.getElementById('diffContent');
+                diffContent.innerHTML = computeInlineDiff(batchModalOriginal, batchModalTranscript);
+                document.getElementById('diffModal').style.display = 'flex';
+                return;
+            }
+
+            if (!batchModalTranscript) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0;"></div>';
+
+            try {
+                const response = await fetch('/api/translate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: batchModalTranscript })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    batchModalTranscript = data.translated;
+                    content.textContent = data.translated;
+                    batchModalTranslated = true;
+                    btn.innerHTML = '번역 전/후';
+                    btn.style.background = 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.2))';
+                    btn.style.borderColor = 'rgba(16,185,129,0.3)';
+                    btn.style.color = '#6ee7b7';
+                } else {
+                    alert(data.error || '번역 실패');
+                    btn.innerHTML = '번역';
+                }
+            } catch (error) {
+                alert('번역 중 오류가 발생했습니다.');
+                btn.innerHTML = '번역';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function batchCorrect() {
+            const btn = document.getElementById('batchBtnCorrect');
+            const content = document.getElementById('batchModalContent');
+
+            if (batchModalCorrected) {
+                const diffContent = document.getElementById('diffContent');
+                diffContent.innerHTML = computeInlineDiff(batchModalOriginal, batchModalTranscript);
+                document.getElementById('diffModal').style.display = 'flex';
+                return;
+            }
+
+            if (!batchModalTranscript) return;
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0;"></div>';
+
+            try {
+                const response = await fetch('/api/correct', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: batchModalTranscript })
+                });
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    batchModalTranscript = data.corrected;
+                    content.textContent = data.corrected;
+                    batchModalCorrected = true;
+                    btn.innerHTML = '교정 전/후';
+                    btn.style.background = 'linear-gradient(135deg, rgba(16,185,129,0.2), rgba(5,150,105,0.2))';
+                    btn.style.borderColor = 'rgba(16,185,129,0.3)';
+                    btn.style.color = '#6ee7b7';
+                } else {
+                    alert(data.error || '교정 실패');
+                    btn.innerHTML = 'GPT 교정';
+                }
+            } catch (error) {
+                alert('교정 중 오류가 발생했습니다.');
+                btn.innerHTML = 'GPT 교정';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function batchCopyTranscript() {
+            if (!batchModalTranscript) return;
+            try {
+                await navigator.clipboard.writeText(batchModalTranscript);
+                alert('전사 내용이 복사되었습니다.');
+            } catch (error) {
+                const textArea = document.createElement('textarea');
+                textArea.value = batchModalTranscript;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('전사 내용이 복사되었습니다.');
+            }
         }
 
         function getBatchStatusIcon(status) {
@@ -3409,40 +3614,66 @@
         };
     </script>
 
-    <!-- 배치 결과 원본/생성 텍스트 비교 모달 -->
+    <!-- 배치 전사 텍스트 모달 -->
     <div class="modal" id="batchTranscriptModal" style="display: none;">
-        <div class="modal-content" style="max-width: 900px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="modal-content" style="max-width: 700px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                <h3 id="batchModalTitle" style="margin: 0;">원본 vs 생성 스크립트</h3>
+                <h3 id="batchModalTitle" style="margin: 0;">전사 텍스트</h3>
                 <button onclick="closeBatchTranscriptModal()" style="background: none; border: none; color: rgba(255,255,255,0.5); font-size: 24px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
             </div>
-            <div style="display: flex; gap: 16px; flex: 1; overflow: hidden;">
-                <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
-                    <div style="font-weight: 600; margin-bottom: 8px; color: #ff6b6b;">원본 전사 텍스트</div>
-                    <div id="batchModalOriginal" style="flex: 1; background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); border-radius: 8px; padding: 12px; overflow-y: auto; font-size: 13px; line-height: 1.6; white-space: pre-wrap;"></div>
-                </div>
-                <div style="flex: 1; display: flex; flex-direction: column; min-width: 0;">
-                    <div style="font-weight: 600; margin-bottom: 8px; color: #51cf66;">생성된 스크립트</div>
-                    <div id="batchModalGenerated" style="flex: 1; background: rgba(81,207,102,0.1); border: 1px solid rgba(81,207,102,0.3); border-radius: 8px; padding: 12px; overflow-y: auto; font-size: 13px; line-height: 1.6; white-space: pre-wrap;"></div>
-                </div>
+            <div class="quick-actions" id="batchModalActions" style="margin-bottom: 12px;">
+                <button class="quick-action-btn yellow" id="batchBtnSummarize" onclick="batchSummarize()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M14 17H4v2h10v-2zm6-8H4v2h16V9zM4 15h16v-2H4v2zM4 5v2h16V5H4z"/></svg>
+                    요약
+                </button>
+                <button class="quick-action-btn blue" id="batchBtnTranslate" onclick="batchTranslate()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg>
+                    번역
+                </button>
+                <button class="quick-action-btn purple" id="batchBtnCorrect" onclick="batchCorrect()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+                    GPT 교정
+                </button>
+                <button class="quick-action-btn" onclick="batchCopyTranscript()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
+                    복사
+                </button>
             </div>
+            <div class="content-box" id="batchModalContent" style="flex: 1; overflow-y: auto; white-space: pre-wrap; font-size: 13px; line-height: 1.8;"></div>
         </div>
     </div>
 
     <style>
         #batchTranscriptModal.active { display: flex !important; }
-        .batch-item-actions { display: flex; gap: 8px; align-items: center; margin-left: auto; }
-        .batch-item-view-btn {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            color: #fff;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
+        .batch-item-actions { display: flex; gap: 6px; align-items: center; margin-left: auto; flex-shrink: 0; }
+        .batch-item-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255,255,255,0.05);
+            color: rgba(255,255,255,0.7);
             cursor: pointer;
             transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .batch-item-view-btn:hover { background: rgba(255,255,255,0.2); }
+        .batch-item-action-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            transform: translateY(-1px);
+        }
+        .batch-download-btn:hover {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: #10b981;
+        }
+        .batch-transcript-btn:hover {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: rgba(139, 92, 246, 0.3);
+            color: #8b5cf6;
+        }
     </style>
 </body>
 </html>

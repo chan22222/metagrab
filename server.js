@@ -746,7 +746,8 @@ app.post('/api/batch-process', async (req, res) => {
                     status: 'success',
                     title: extractResult.title,
                     platform: extractResult.platform,
-                    transcript: transcribeResult.text
+                    transcript: transcribeResult.text,
+                    video_url: extractResult.video_url
                 });
 
                 sendEvent('progress', { index: i, status: 'success', title: extractResult.title, current: i + 1, total: urls.length });
