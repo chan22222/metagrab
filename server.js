@@ -101,7 +101,47 @@ app.post('/api/extract', async (req, res) => {
     }
 });
 
-// YouTube 쿠키 저장 API (Netscape 형식)
+// JSON 쿠키 → Netscape 형식 변환
+function convertToNetscape(input) {
+    const trimmed = input.trim();
+
+    // 이미 Netscape 형식이면 그대로 반환
+    if (trimmed.startsWith('# Netscape') || trimmed.startsWith('# HTTP Cookie')) {
+        return trimmed;
+    }
+
+    // 탭 구분자가 포함된 줄이 있으면 Netscape 형식 (헤더만 없는 경우)
+    const lines = trimmed.split('\n').filter(l => l.trim() && !l.startsWith('#'));
+    if (lines.length > 0 && lines[0].split('\t').length >= 7) {
+        return '# Netscape HTTP Cookie File\n\n' + trimmed;
+    }
+
+    // JSON 형식 시도
+    try {
+        let cookieArray = JSON.parse(trimmed);
+        if (!Array.isArray(cookieArray)) cookieArray = [cookieArray];
+
+        const netscapeLines = ['# Netscape HTTP Cookie File', ''];
+        for (const c of cookieArray) {
+            const domain = c.domain || '.youtube.com';
+            const includeSubdomains = domain.startsWith('.') ? 'TRUE' : 'FALSE';
+            const cookiePath = c.path || '/';
+            const secure = c.secure ? 'TRUE' : 'FALSE';
+            const expiry = c.expirationDate ? Math.floor(c.expirationDate) : (c.expiry || 0);
+            const name = c.name || '';
+            const value = c.value || '';
+            if (name) {
+                netscapeLines.push(`${domain}\t${includeSubdomains}\t${cookiePath}\t${secure}\t${expiry}\t${name}\t${value}`);
+            }
+        }
+        return netscapeLines.join('\n');
+    } catch (e) {
+        // JSON 파싱 실패 → 그냥 Netscape 헤더 붙여서 반환
+        return '# Netscape HTTP Cookie File\n\n' + trimmed;
+    }
+}
+
+// YouTube 쿠키 저장 API
 app.post('/api/youtube/cookie', async (req, res) => {
     const { cookies } = req.body;
 
@@ -110,23 +150,17 @@ app.post('/api/youtube/cookie', async (req, res) => {
     }
 
     try {
-        // Netscape 형식 쿠키를 파일로 저장
         const cookiesPath = path.join(__dirname, 'youtube_cookies.txt');
-        let cookieContent = cookies.trim();
-
-        // Netscape 헤더가 없으면 추가
-        if (!cookieContent.startsWith('# Netscape') && !cookieContent.startsWith('# HTTP Cookie')) {
-            cookieContent = '# Netscape HTTP Cookie File\n# This file is generated automatically.\n\n' + cookieContent;
-        }
+        const cookieContent = convertToNetscape(cookies);
 
         fs.writeFileSync(cookiesPath, cookieContent);
 
-        // Supabase에도 저장 (Railway 재시작 대비)
+        // Supabase에도 Netscape 형식으로 저장
         if (supabase.enabled) {
             await supabase.setSession('youtube_cookies', cookieContent);
         }
 
-        console.log('[Server] YouTube 쿠키 저장 완료');
+        console.log('[Server] YouTube 쿠키 저장 완료 (Netscape 형식)');
         return res.json({ success: true, message: 'YouTube 쿠키가 저장되었습니다!' });
     } catch (error) {
         console.error('YouTube 쿠키 저장 에러:', error);
@@ -372,14 +406,27 @@ async function initAPIKeyPool() {
         console.log('[Server] OpenAI API 키가 없습니다. 웹에서 등록하세요.');
     }
 
-    // Supabase에서 YouTube 쿠키 복원
+    // Supabase에서 YouTube 쿠키 복원/검증
     if (supabase.enabled) {
         const ytCookies = await supabase.getSession('youtube_cookies');
         if (ytCookies) {
             const cookiesPath = path.join(__dirname, 'youtube_cookies.txt');
-            if (!fs.existsSync(cookiesPath)) {
-                fs.writeFileSync(cookiesPath, ytCookies);
-                console.log('[Server] YouTube 쿠키 Supabase에서 복원됨');
+            const netscapeCookies = convertToNetscape(ytCookies);
+
+            // 기존 파일이 없거나 JSON 형식이면 Netscape로 덮어쓰기
+            let needsWrite = !fs.existsSync(cookiesPath);
+            if (!needsWrite) {
+                const existing = fs.readFileSync(cookiesPath, 'utf-8').trim();
+                if (existing.startsWith('[') || existing.startsWith('{')) {
+                    needsWrite = true;
+                }
+            }
+
+            if (needsWrite) {
+                fs.writeFileSync(cookiesPath, netscapeCookies);
+                // Supabase도 올바른 형식으로 업데이트
+                await supabase.setSession('youtube_cookies', netscapeCookies);
+                console.log('[Server] YouTube 쿠키 복원/변환 완료 (Netscape 형식)');
             }
         }
     }
