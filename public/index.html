@@ -1079,67 +1079,6 @@
             height: 16px;
         }
 
-        /* Notion Save Box */
-        .notion-save-box {
-            background: rgba(0, 0, 0, 0.2);
-            border: 1px solid rgba(99, 102, 241, 0.2);
-            border-radius: 14px;
-            padding: 16px;
-            margin-top: 16px;
-        }
-
-        .notion-save-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
-        }
-
-        .notion-save-header svg {
-            width: 20px;
-            height: 20px;
-            color: rgba(255, 255, 255, 0.7);
-        }
-
-        .notion-save-header span {
-            font-size: 0.9rem;
-            font-weight: 500;
-            color: rgba(255, 255, 255, 0.8);
-        }
-
-        .notion-input-group {
-            display: flex;
-            gap: 10px;
-        }
-
-        .notion-input {
-            flex: 1;
-            padding: 12px 16px;
-            font-size: 0.85rem;
-            font-family: inherit;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            outline: none;
-            transition: all 0.2s;
-        }
-
-        .notion-input:focus {
-            border-color: rgba(99, 102, 241, 0.5);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-        }
-
-        .notion-input::placeholder {
-            color: rgba(255, 255, 255, 0.3);
-        }
-
-        .notion-hint {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.4);
-            margin-top: 8px;
-        }
-
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -1337,17 +1276,6 @@
         .batch-header p {
             color: rgba(255, 255, 255, 0.5);
             font-size: 0.85rem;
-        }
-
-        .batch-instructor-select {
-            margin-bottom: 16px;
-        }
-
-        .batch-instructor-select label {
-            display: block;
-            font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.7);
-            margin-bottom: 8px;
         }
 
         .batch-urls-input {
@@ -1832,11 +1760,6 @@
                     전사
                     <span class="result-tab-badge" id="transcribeBadge" style="display: none;">완료</span>
                 </button>
-                <button class="result-tab" onclick="switchResultTab('script')" data-tab="script">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                    스크립트
-                    <span class="result-tab-badge" id="scriptBadge" style="display: none;">완료</span>
-                </button>
             </div>
 
             <!-- 탭 1: 미디어 -->
@@ -1925,73 +1848,6 @@
                 </div>
             </div>
 
-            <!-- 탭 3: 스크립트 -->
-            <div class="tab-panel" id="tabPanelScript">
-                <!-- 스크립트 생성 컨트롤 -->
-                <div class="action-card">
-                    <div class="action-card-header">
-                        <div class="action-card-icon green">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
-                        </div>
-                        <div>
-                            <div class="action-card-title">스크립트 생성</div>
-                            <div class="action-card-desc">강사별 맞춤 스크립트를 생성합니다</div>
-                        </div>
-                    </div>
-                    <div class="inline-controls">
-                        <select id="instructorSelect" class="control-select" onchange="onInstructorChange()">
-                            <option value="">강사 선택...</option>
-                        </select>
-                        <label id="googleDriveLabel" class="checkbox-label" style="display: none;">
-                            <input type="checkbox" id="uploadToGoogleDrive" checked>
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7.71 3.5L1.15 15l4.58 7.5h13.54l4.58-7.5L17.29 3.5H7.71zm-.29 1h9.16l5.48 10H2.94l5.48-10zm4.58 2L6.52 15h10.96L12 6.5z"/></svg>
-                            Drive 저장
-                        </label>
-                        <button class="action-btn success" id="btnGenerateScript" onclick="generateScript()">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19 8l-4 4h3c0 3.31-2.69 6-6 6-1.01 0-1.97-.25-2.8-.7l-1.46 1.46C8.97 19.54 10.43 20 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46C15.03 4.46 13.57 4 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/></svg>
-                            생성
-                        </button>
-                        <button class="action-btn" onclick="showScriptSettings()">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                            설정
-                        </button>
-                    </div>
-                </div>
-
-                <!-- 생성된 스크립트 결과 -->
-                <div id="generatedScriptSection" style="display: none;">
-                    <div class="section-header">
-                        <div class="section-title green">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
-                            <span id="generatedInstructorName"></span> 버전 스크립트
-                        </div>
-                        <button class="action-btn" onclick="copyGeneratedScript()" style="padding: 6px 12px;">
-                            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"/></svg>
-                            복사
-                        </button>
-                    </div>
-                    <div class="content-box" id="generatedScriptContent" style="background: rgba(16,185,129,0.08); border: 1px solid rgba(16,185,129,0.15);"></div>
-
-                    <!-- Notion 저장 -->
-                    <div id="notionSaveSection" class="notion-save-box" style="display: none;">
-                        <div class="notion-save-header">
-                            <svg viewBox="0 0 100 100" fill="currentColor"><path d="M6.017 4.313l55.333 -4.087c6.797 -0.583 8.543 -0.19 12.817 2.917l17.663 12.443c2.913 2.14 3.883 2.723 3.883 5.053v68.243c0 4.277 -1.553 6.807 -6.99 7.193l-64.25 3.888c-4.083 0.193 -6.023 -0.39 -8.16 -3.113l-12.433 -16.136c-2.333 -3.107 -3.307 -5.443 -3.307 -8.167v-65.607c0 -3.497 1.553 -6.413 5.443 -6.627z"/></svg>
-                            <span>Notion에 저장</span>
-                        </div>
-                        <div class="notion-input-group">
-                            <input type="text" id="notionDbUrl" class="notion-input" placeholder="Notion 데이터베이스 URL 붙여넣기">
-                            <button class="action-btn primary" id="btnSaveNotionNew" onclick="saveToNotionWithUrl()">저장</button>
-                        </div>
-                        <p class="notion-hint">예: https://www.notion.so/workspace/데이터베이스ID?v=...</p>
-                    </div>
-                </div>
-
-                <!-- 빈 상태 -->
-                <div id="scriptEmpty" class="empty-state">
-                    <svg class="empty-state-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
-                    <p>먼저 전사를 완료한 후 강사를 선택하세요</p>
-                </div>
-            </div>
         </section>
         </div><!-- 단일 모드 섹션 끝 -->
 
@@ -2001,19 +1857,8 @@
                 <div class="batch-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
                     <div>
                         <h3>병렬 처리 모드</h3>
-                        <p>여러 URL을 한 번에 처리하여 스크립트 생성 및 노션 저장까지 자동으로 완료합니다.</p>
+                        <p>여러 URL을 한 번에 처리하여 비디오 추출 및 음성 전사를 자동으로 완료합니다.</p>
                     </div>
-                    <button class="action-btn" onclick="showScriptSettings()" style="flex-shrink: 0;">
-                        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
-                        설정
-                    </button>
-                </div>
-
-                <div class="batch-instructor-select">
-                    <label for="batchInstructorSelect">강사 선택</label>
-                    <select id="batchInstructorSelect" class="control-select" style="width: 100%;">
-                        <option value="">강사를 선택하세요...</option>
-                    </select>
                 </div>
 
                 <textarea
@@ -2060,39 +1905,6 @@
             </div>
         </div><!-- 병렬 모드 섹션 끝 -->
 
-        <!-- 스크립트 설정 모달 -->
-        <div class="modal" id="scriptSettingsModal" style="display: none;">
-            <div class="modal-content" style="max-width: 600px; max-height: 85vh; overflow: hidden; display: flex; flex-direction: column;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <h3 style="margin: 0;">스크립트 생성 설정</h3>
-                    <button onclick="closeScriptSettings()" style="background: none; border: none; color: rgba(255,255,255,0.5); font-size: 24px; cursor: pointer; padding: 0; line-height: 1;">&times;</button>
-                </div>
-
-                <!-- 탭 -->
-                <div style="display: flex; gap: 6px; margin-bottom: 20px; background: rgba(0,0,0,0.3); padding: 5px; border-radius: 12px;">
-                    <button class="script-settings-tab active" id="tabPrompt" onclick="showScriptSettingsTab('prompt')" style="flex: 1; padding: 10px; border: none; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">지침 설정</button>
-                    <button class="script-settings-tab" id="tabInstructors" onclick="showScriptSettingsTab('instructors')" style="flex: 1; padding: 10px; border: none; background: transparent; color: rgba(255,255,255,0.5); border-radius: 8px; cursor: pointer; font-size: 0.9rem; font-weight: 500;">강사 관리</button>
-                </div>
-
-                <!-- 지침 설정 탭 -->
-                <div id="promptSettingsContent" style="flex: 1; overflow-y: auto;">
-                    <p style="color: rgba(255,255,255,0.5); font-size: 0.85rem; margin-bottom: 12px;">GPT에게 전달할 시스템 지침을 입력하세요. 강사 정보는 자동으로 추가됩니다.</p>
-                    <textarea id="promptTextarea" placeholder="예: 우리는 강사의 광고 소재를 기획하는 회사야. 너는 강사 정보를 참고해서 우리가 제공하는 스크립트를 강사의 정보로 치환해서 새로운 소재처럼 만들어줘." style="width: 100%; height: 200px; padding: 16px; font-size: 0.9rem; font-family: inherit; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; background: rgba(0,0,0,0.3); color: #fff; outline: none; resize: vertical; line-height: 1.6;"></textarea>
-                    <button onclick="savePrompt()" style="margin-top: 12px; padding: 12px 24px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; border-radius: 10px; font-size: 0.9rem; font-weight: 600; cursor: pointer;">지침 저장</button>
-                </div>
-
-                <!-- 강사 관리 탭 -->
-                <div id="instructorsSettingsContent" style="display: none; flex: 1; overflow-y: auto;">
-                    <div style="margin-bottom: 16px;">
-                        <input type="text" id="newInstructorName" placeholder="강사 이름" style="width: 100%; padding: 12px 16px; font-size: 0.9rem; font-family: inherit; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.3); color: #fff; outline: none; margin-bottom: 8px;">
-                        <textarea id="newInstructorInfo" placeholder="강사 정보 (경력, 전문분야, 특징 등)" style="width: 100%; height: 80px; padding: 12px 16px; font-size: 0.9rem; font-family: inherit; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; background: rgba(0,0,0,0.3); color: #fff; outline: none; resize: vertical; margin-bottom: 8px;"></textarea>
-                        <button onclick="addInstructor()" style="padding: 10px 20px; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 600; cursor: pointer;">강사 추가</button>
-                    </div>
-                    <div id="instructorsList" style="max-height: 250px; overflow-y: auto;"></div>
-                </div>
-            </div>
-        </div>
-
         <footer>
             <button class="settings-btn" onclick="showOpenAIKeyBanner()" title="API 키 설정">
                 <span>&#9881;</span> OPENAI WHISPER API
@@ -2105,7 +1917,6 @@
         let currentVideoData = null;
         let lastFailedUrl = null;
         let transcribeAvailable = false;
-        let notionAvailable = false;
         let currentTranscript = '';
         let currentCorrectedText = '';
         let currentSummary = '';
@@ -2128,42 +1939,17 @@
                 document.getElementById('singleModeSection').classList.add('active');
             } else if (mode === 'batch') {
                 document.getElementById('batchModeSection').classList.add('active');
-                // 병렬 모드 강사 목록 업데이트
-                updateBatchInstructorSelect();
             }
-        }
-
-        // 병렬 모드 강사 선택 드롭다운 업데이트
-        async function updateBatchInstructorSelect() {
-            const select = document.getElementById('batchInstructorSelect');
-
-            // 강사 목록이 비어있으면 먼저 로드
-            if (instructorsList.length === 0) {
-                select.innerHTML = '<option value="">강사 목록 로딩 중...</option>';
-                await loadInstructors();
-            }
-
-            select.innerHTML = '<option value="">강사를 선택하세요...</option>';
-            instructorsList.forEach(inst => {
-                select.innerHTML += `<option value="${inst.id}" style="color: #333; background: #fff;">${inst.name}</option>`;
-            });
         }
 
         // ===== 병렬 처리 함수 =====
         let batchProcessing = false;
         let lastBatchResults = []; // 마지막 결과 저장 (재시도용)
-        let lastInstructorId = null; // 마지막 강사 ID 저장
 
         async function startBatchProcess() {
             if (batchProcessing) return;
 
-            const instructorId = document.getElementById('batchInstructorSelect').value;
             const urlsText = document.getElementById('batchUrlsInput').value.trim();
-
-            if (!instructorId) {
-                alert('강사를 선택해주세요.');
-                return;
-            }
 
             if (!urlsText) {
                 alert('처리할 URL을 입력해주세요.');
@@ -2181,7 +1967,6 @@
             }
 
             batchProcessing = true;
-            lastInstructorId = instructorId;
             const startBtn = document.getElementById('batchStartBtn');
             startBtn.disabled = true;
             startBtn.innerHTML = `
@@ -2208,7 +1993,7 @@
                 const response = await fetch('/api/batch-process', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ urls, instructorId })
+                    body: JSON.stringify({ urls })
                 });
 
                 const reader = response.body.getReader();
@@ -2254,7 +2039,7 @@
 
         // SSE 이벤트 핸들러
         function handleBatchEvent(event, currentItems, urls) {
-            const { type, index, status, message, current, total, error, title, notionUrl, results, summary } = event;
+            const { type, index, status, message, current, total, error, title, results, summary } = event;
 
             if (type === 'start') {
                 console.log(`[Batch] 시작: ${total}개 URL`);
@@ -2271,7 +2056,6 @@
                     currentItems[index].status = status;
                     if (error) currentItems[index].error = error;
                     if (title) currentItems[index].title = title;
-                    if (notionUrl) currentItems[index].notionUrl = notionUrl;
                     renderBatchItems(currentItems);
                 }
             } else if (type === 'complete') {
@@ -2303,9 +2087,6 @@
             switch (status) {
                 case 'extracting': return '비디오 추출 중...';
                 case 'transcribing': return '음성 전사 중...';
-                case 'generating': return '스크립트 생성 중...';
-                case 'uploading': return 'Drive 업로드 중...';
-                case 'saving': return '노션 저장 중...';
                 case 'success': return '완료';
                 case 'failed': return '실패';
                 default: return '처리 중...';
@@ -2341,10 +2122,6 @@
                     detailText = item.error || '건너뜀';
                 }
 
-                const notionLink = item.notionUrl
-                    ? `<a href="${item.notionUrl}" target="_blank" class="batch-item-link">Notion</a>`
-                    : '';
-
                 // 성공한 항목에 원본 보기 버튼 추가
                 const viewBtn = item.status === 'success' && item.originalTranscript
                     ? `<button class="batch-item-view-btn" onclick="showBatchTranscriptModal(${index})">원본 보기</button>`
@@ -2361,7 +2138,6 @@
                         </div>
                         <div class="batch-item-actions">
                             ${viewBtn}
-                            ${notionLink}
                         </div>
                     </div>
                 `;
@@ -2423,11 +2199,6 @@
                 return;
             }
 
-            if (!lastInstructorId) {
-                alert('강사 정보가 없습니다. 다시 시작해주세요.');
-                return;
-            }
-
             batchProcessing = true;
             const retryBtn = document.getElementById('batchRetryBtn');
             const startBtn = document.getElementById('batchStartBtn');
@@ -2456,7 +2227,7 @@
                 const response = await fetch('/api/batch-process', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ urls: failedUrls, instructorId: lastInstructorId })
+                    body: JSON.stringify({ urls: failedUrls })
                 });
 
                 const data = await response.json();
@@ -2554,23 +2325,6 @@
             }
         }
 
-        // 스크립트 생성 완료 시 뱃지 표시 및 빈 상태 숨기기
-        function updateScriptUI(hasContent) {
-            const badge = document.getElementById('scriptBadge');
-            const emptyState = document.getElementById('scriptEmpty');
-            const section = document.getElementById('generatedScriptSection');
-
-            if (hasContent) {
-                if (badge) badge.style.display = 'inline';
-                if (emptyState) emptyState.style.display = 'none';
-                if (section) section.style.display = 'block';
-            } else {
-                if (badge) badge.style.display = 'none';
-                if (emptyState) emptyState.style.display = 'block';
-                if (section) section.style.display = 'none';
-            }
-        }
-
         // 페이지 로드 시 전사 기능 상태 확인
         async function checkTranscribeStatus() {
             try {
@@ -2585,505 +2339,6 @@
                 }
             } catch (error) {
                 console.error('전사 상태 확인 실패:', error);
-            }
-        }
-
-        // Google Drive 상태 확인
-        async function checkGoogleDriveStatus() {
-            try {
-                const response = await fetch('/api/google/status');
-                const data = await response.json();
-
-                // Google Drive 체크박스 표시/숨김
-                const googleDriveLabel = document.getElementById('googleDriveLabel');
-                if (googleDriveLabel) {
-                    if (data.enabled && data.authenticated) {
-                        googleDriveLabel.style.display = 'flex';
-                    } else {
-                        googleDriveLabel.style.display = 'none';
-                    }
-                }
-            } catch (error) {
-                console.error('Google Drive 상태 확인 실패:', error);
-            }
-        }
-
-        // Notion 상태 확인
-        async function checkNotionStatus() {
-            try {
-                const response = await fetch('/api/notion/status');
-                const data = await response.json();
-                notionAvailable = data.enabled;
-
-                // Notion 버튼 표시/숨김
-                const btnSaveNotion = document.getElementById('btnSaveNotion');
-                if (btnSaveNotion) {
-                    btnSaveNotion.style.display = notionAvailable ? 'inline-flex' : 'none';
-                }
-            } catch (error) {
-                console.error('Notion 상태 확인 실패:', error);
-            }
-        }
-
-        // ===== 강사 및 스크립트 생성 기능 =====
-        let instructorsList = [];
-        let generatedScript = '';
-
-        // 강사 목록 로드
-        async function loadInstructors() {
-            try {
-                const response = await fetch('/api/instructors');
-                const data = await response.json();
-                if (data.success) {
-                    instructorsList = data.instructors;
-                    renderInstructorSelect(false);
-                    renderInstructorsList();
-                    // 저장된 강사 선택 로드
-                    await loadSelectedInstructor();
-                }
-            } catch (error) {
-                console.error('강사 목록 로드 실패:', error);
-            }
-        }
-
-        // 강사 선택 드롭다운 렌더링
-        function renderInstructorSelect(preserveSelection = true) {
-            const select = document.getElementById('instructorSelect');
-            const currentValue = preserveSelection ? select.value : '';
-
-            select.innerHTML = '<option value="" style="color: #333; background: #fff;">강사 선택...</option>';
-            instructorsList.forEach(inst => {
-                select.innerHTML += `<option value="${inst.id}" style="color: #333; background: #fff;">${inst.name}</option>`;
-            });
-
-            // 이전 선택 복원
-            if (currentValue) {
-                select.value = currentValue;
-            }
-        }
-
-        // 강사 선택 변경 시 저장
-        async function onInstructorChange() {
-            const select = document.getElementById('instructorSelect');
-            try {
-                await fetch('/api/selected-instructor', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ instructorId: select.value })
-                });
-            } catch (error) {
-                console.error('강사 선택 저장 실패:', error);
-            }
-        }
-
-        // 저장된 강사 선택 로드
-        async function loadSelectedInstructor() {
-            try {
-                const response = await fetch('/api/selected-instructor');
-                const data = await response.json();
-                if (data.success && data.instructorId) {
-                    document.getElementById('instructorSelect').value = data.instructorId;
-                }
-            } catch (error) {
-                console.error('선택된 강사 로드 실패:', error);
-            }
-        }
-
-        // 강사 목록 렌더링 (설정 모달)
-        function renderInstructorsList() {
-            const container = document.getElementById('instructorsList');
-            if (instructorsList.length === 0) {
-                container.innerHTML = '<p style="color: rgba(255,255,255,0.4); text-align: center; padding: 20px;">등록된 강사가 없습니다.</p>';
-                return;
-            }
-
-            let html = '';
-            instructorsList.forEach(inst => {
-                html += `
-                <div id="instructor-${inst.id}" style="background: rgba(0,0,0,0.2); border-radius: 10px; padding: 14px; margin-bottom: 10px;">
-                    <div class="instructor-view-${inst.id}">
-                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
-                            <strong style="color: #6ee7b7; font-size: 0.95rem;">${escapeHtml(inst.name)}</strong>
-                            <div style="display: flex; gap: 6px;">
-                                <button onclick="showEditInstructor('${inst.id}')" style="background: rgba(99,102,241,0.2); border: none; color: #a78bfa; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">수정</button>
-                                <button onclick="deleteInstructor('${inst.id}')" style="background: rgba(239,68,68,0.2); border: none; color: #f87171; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; cursor: pointer;">삭제</button>
-                            </div>
-                        </div>
-                        <p style="color: rgba(255,255,255,0.6); font-size: 0.8rem; line-height: 1.5; margin: 0;">${escapeHtml(inst.info)}</p>
-                    </div>
-                    <div class="instructor-edit-${inst.id}" style="display: none;">
-                        <input type="text" id="edit-name-${inst.id}" value="${escapeHtml(inst.name)}" style="width: 100%; padding: 10px 12px; font-size: 0.85rem; font-family: inherit; border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; outline: none; margin-bottom: 8px;">
-                        <textarea id="edit-info-${inst.id}" style="width: 100%; height: 60px; padding: 10px 12px; font-size: 0.85rem; font-family: inherit; border: 1px solid rgba(99,102,241,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; outline: none; resize: vertical; margin-bottom: 8px;">${escapeHtml(inst.info)}</textarea>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="updateInstructor('${inst.id}')" style="padding: 8px 16px; background: linear-gradient(135deg, #6366f1, #8b5cf6); color: #fff; border: none; border-radius: 6px; font-size: 0.8rem; font-weight: 600; cursor: pointer;">저장</button>
-                            <button onclick="cancelEditInstructor('${inst.id}')" style="padding: 8px 16px; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7); border: none; border-radius: 6px; font-size: 0.8rem; cursor: pointer;">취소</button>
-                        </div>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html;
-        }
-
-        // 강사 수정 모드 표시
-        function showEditInstructor(id) {
-            document.querySelector(`.instructor-view-${id}`).style.display = 'none';
-            document.querySelector(`.instructor-edit-${id}`).style.display = 'block';
-        }
-
-        // 강사 수정 취소
-        function cancelEditInstructor(id) {
-            document.querySelector(`.instructor-view-${id}`).style.display = 'block';
-            document.querySelector(`.instructor-edit-${id}`).style.display = 'none';
-            // 원래 값으로 복원
-            const inst = instructorsList.find(i => i.id === id);
-            if (inst) {
-                document.getElementById(`edit-name-${id}`).value = inst.name;
-                document.getElementById(`edit-info-${id}`).value = inst.info;
-            }
-        }
-
-        // 강사 수정 저장
-        async function updateInstructor(id) {
-            const name = document.getElementById(`edit-name-${id}`).value.trim();
-            const info = document.getElementById(`edit-info-${id}`).value.trim();
-
-            if (!name || !info) {
-                alert('강사 이름과 정보를 모두 입력해주세요.');
-                return;
-            }
-
-            try {
-                const response = await fetch(`/api/instructors/${id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, info })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert('강사 정보가 수정되었습니다!');
-                    loadInstructors();
-                } else {
-                    alert(data.error || '강사 수정 실패');
-                }
-            } catch (error) {
-                alert('강사 수정 중 오류가 발생했습니다.');
-            }
-        }
-
-        // 강사 추가
-        async function addInstructor() {
-            const name = document.getElementById('newInstructorName').value.trim();
-            const info = document.getElementById('newInstructorInfo').value.trim();
-
-            if (!name || !info) {
-                showError('강사 이름과 정보를 모두 입력해주세요.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/instructors', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, info })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    document.getElementById('newInstructorName').value = '';
-                    document.getElementById('newInstructorInfo').value = '';
-                    showSuccess('강사가 추가되었습니다.');
-                    loadInstructors();
-                } else {
-                    showError(data.error || '강사 추가 실패');
-                }
-            } catch (error) {
-                showError('강사 추가 중 오류가 발생했습니다.');
-            }
-        }
-
-        // 강사 삭제
-        async function deleteInstructor(id) {
-            if (!confirm('이 강사를 삭제하시겠습니까?')) return;
-
-            try {
-                const response = await fetch(`/api/instructors/${id}`, {
-                    method: 'DELETE'
-                });
-                const data = await response.json();
-                if (data.success) {
-                    showSuccess('강사가 삭제되었습니다.');
-                    loadInstructors();
-                } else {
-                    showError(data.error || '강사 삭제 실패');
-                }
-            } catch (error) {
-                showError('강사 삭제 중 오류가 발생했습니다.');
-            }
-        }
-
-        // 지침 로드
-        async function loadPrompt() {
-            try {
-                const response = await fetch('/api/prompt');
-                const data = await response.json();
-                if (data.success) {
-                    document.getElementById('promptTextarea').value = data.prompt || '';
-                }
-            } catch (error) {
-                console.error('지침 로드 실패:', error);
-            }
-        }
-
-        // 지침 저장
-        async function savePrompt() {
-            const prompt = document.getElementById('promptTextarea').value.trim();
-            if (!prompt) {
-                alert('지침을 입력해주세요.');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/prompt', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ prompt })
-                });
-                const data = await response.json();
-                if (data.success) {
-                    alert('지침이 저장되었습니다!');
-                } else {
-                    alert(data.error || '지침 저장 실패');
-                }
-            } catch (error) {
-                alert('지침 저장 중 오류가 발생했습니다.');
-            }
-        }
-
-        // 스크립트 생성
-        async function generateScript() {
-            const instructorId = document.getElementById('instructorSelect').value;
-
-            if (!currentTranscript) {
-                showError('먼저 음성 전사를 실행해주세요.');
-                return;
-            }
-
-            if (!instructorId) {
-                showError('강사를 선택해주세요.');
-                return;
-            }
-
-            // 선택된 강사 정보
-            const instructor = instructorsList.find(i => i.id === instructorId);
-            const instructorName = instructor ? instructor.name : null;
-
-            const btn = document.getElementById('btnGenerateScript');
-            const originalHTML = btn.innerHTML;
-            btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></div> 생성 중...';
-            btn.disabled = true;
-
-            try {
-                const response = await fetch('/api/generate-script', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        transcript: currentTranscript,
-                        instructorId: instructorId
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    generatedScript = data.script;
-                    document.getElementById('generatedInstructorName').textContent = data.instructor;
-                    document.getElementById('generatedScriptContent').textContent = data.script;
-                    document.getElementById('notionSaveSection').style.display = 'block';
-                    updateScriptUI(true);
-
-                    // Google Drive 업로드 (체크박스 활성화 시)
-                    const uploadToGoogleDrive = document.getElementById('uploadToGoogleDrive')?.checked || false;
-                    if (uploadToGoogleDrive && currentVideoData?.video_url) {
-                        btn.innerHTML = '<div class="spinner" style="width:16px;height:16px;border-width:2px;margin:0;"></div> Drive 업로드 중...';
-
-                        try {
-                            const uploadResponse = await fetch('/api/google/upload-from-url', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    videoUrl: currentVideoData.video_url,
-                                    videoTitle: currentVideoData.title || 'video',
-                                    instructorName: instructorName
-                                })
-                            });
-
-                            const uploadData = await uploadResponse.json();
-                            if (uploadResponse.ok && uploadData.success) {
-                                currentVideoData.googleDriveUrl = uploadData.directUrl;
-                                showSuccess(`${data.instructor} 스크립트 생성 완료! Google Drive 업로드됨`);
-                            } else {
-                                showSuccess(`${data.instructor} 스크립트 생성 완료! (Drive 업로드 실패: ${uploadData.error})`);
-                            }
-                        } catch (uploadError) {
-                            console.error('Google Drive 업로드 에러:', uploadError);
-                            showSuccess(`${data.instructor} 스크립트 생성 완료! (Drive 업로드 실패)`);
-                        }
-                    } else {
-                        showSuccess(`${data.instructor} 버전 스크립트가 생성되었습니다.`);
-                    }
-                } else {
-                    showError(data.error || '스크립트 생성 실패');
-                }
-            } catch (error) {
-                showError('스크립트 생성 중 오류가 발생했습니다.');
-                console.error(error);
-            } finally {
-                btn.innerHTML = originalHTML;
-                btn.disabled = false;
-            }
-        }
-
-        // 생성된 스크립트 복사
-        async function copyGeneratedScript() {
-            if (!generatedScript) return;
-            try {
-                await navigator.clipboard.writeText(generatedScript);
-                showSuccess('스크립트가 복사되었습니다.');
-            } catch (error) {
-                // 폴백
-                const textarea = document.createElement('textarea');
-                textarea.value = generatedScript;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showSuccess('스크립트가 복사되었습니다.');
-            }
-        }
-
-        // 설정 모달 표시
-        function showScriptSettings() {
-            loadPrompt();
-            loadInstructors();
-            document.getElementById('scriptSettingsModal').style.display = 'flex';
-        }
-
-        // 설정 모달 닫기
-        function closeScriptSettings() {
-            document.getElementById('scriptSettingsModal').style.display = 'none';
-        }
-
-        // 설정 탭 전환
-        function showScriptSettingsTab(tab) {
-            const tabPrompt = document.getElementById('tabPrompt');
-            const tabInstructors = document.getElementById('tabInstructors');
-            const promptContent = document.getElementById('promptSettingsContent');
-            const instructorsContent = document.getElementById('instructorsSettingsContent');
-
-            if (tab === 'prompt') {
-                tabPrompt.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
-                tabPrompt.style.color = '#fff';
-                tabInstructors.style.background = 'transparent';
-                tabInstructors.style.color = 'rgba(255,255,255,0.5)';
-                promptContent.style.display = 'block';
-                instructorsContent.style.display = 'none';
-            } else {
-                tabInstructors.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
-                tabInstructors.style.color = '#fff';
-                tabPrompt.style.background = 'transparent';
-                tabPrompt.style.color = 'rgba(255,255,255,0.5)';
-                promptContent.style.display = 'none';
-                instructorsContent.style.display = 'block';
-            }
-        }
-
-        // Notion URL에서 데이터베이스 ID 추출
-        function extractNotionDatabaseId(url) {
-            try {
-                // URL 형식: https://www.notion.so/workspace/DATABASE_ID?v=...
-                // 또는: https://www.notion.so/DATABASE_ID?v=...
-                const urlObj = new URL(url);
-                const pathname = urlObj.pathname;
-
-                // 경로에서 마지막 세그먼트 추출 (32자 hex 문자열)
-                const segments = pathname.split('/').filter(s => s);
-                const lastSegment = segments[segments.length - 1];
-
-                // 32자 hex 문자열인지 확인 (하이픈 없는 UUID)
-                if (lastSegment && /^[a-f0-9]{32}$/i.test(lastSegment)) {
-                    return lastSegment;
-                }
-
-                // 하이픈 포함된 UUID 형식도 체크
-                if (lastSegment && /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(lastSegment)) {
-                    return lastSegment.replace(/-/g, '');
-                }
-
-                return null;
-            } catch (e) {
-                return null;
-            }
-        }
-
-        // Notion에 저장 (URL 직접 입력)
-        async function saveToNotionWithUrl() {
-            const urlInput = document.getElementById('notionDbUrl');
-            const notionUrl = urlInput.value.trim();
-
-            if (!notionUrl) {
-                showError('Notion 데이터베이스 URL을 입력해주세요.');
-                return;
-            }
-
-            const databaseId = extractNotionDatabaseId(notionUrl);
-            if (!databaseId) {
-                showError('올바른 Notion 데이터베이스 URL을 입력해주세요.');
-                return;
-            }
-
-            if (!generatedScript) {
-                showError('저장할 스크립트가 없습니다. 먼저 스크립트를 생성해주세요.');
-                return;
-            }
-
-            const btn = document.getElementById('btnSaveNotionNew');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<div class="spinner" style="width:14px;height:14px;border-width:2px;margin:0;"></div>';
-            btn.disabled = true;
-
-            const instructorName = document.getElementById('generatedInstructorName').textContent;
-
-            try {
-                // Google Drive URL이 있으면 사용, 없으면 원본 URL 사용
-                const videoUrlToSave = currentVideoData?.googleDriveUrl || currentVideoData?.video_url || currentVideoData?.url || '';
-
-                const response = await fetch('/api/notion/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        databaseId: databaseId,
-                        videoUrl: videoUrlToSave,
-                        videoTitle: `[${instructorName}] ${currentVideoData?.title || '제목 없음'}`,
-                        platform: currentVideoData?.platform || 'Unknown',
-                        correctedText: generatedScript,
-                        instructorName: instructorName
-                    })
-                });
-
-                const data = await response.json();
-
-                if (response.ok && data.success) {
-                    // 성공 시 URL 저장
-                    saveNotionUrl(notionUrl);
-                    showSuccess('Notion에 저장되었습니다!');
-                } else {
-                    showError(data.error || 'Notion 저장에 실패했습니다.');
-                }
-            } catch (error) {
-                console.error('Notion 저장 에러:', error);
-                showError('Notion 저장 중 오류가 발생했습니다.');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
             }
         }
 
@@ -3269,39 +2524,10 @@
             }
         }
 
-        // Notion URL 로드
-        async function loadNotionUrl() {
-            try {
-                const response = await fetch('/api/notion-url');
-                const data = await response.json();
-                if (data.success && data.url) {
-                    document.getElementById('notionDbUrl').value = data.url;
-                }
-            } catch (error) {
-                console.error('Notion URL 로드 실패:', error);
-            }
-        }
-
-        // Notion URL 저장
-        async function saveNotionUrl(url) {
-            try {
-                await fetch('/api/notion-url', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ url })
-                });
-            } catch (error) {
-                console.error('Notion URL 저장 실패:', error);
-            }
-        }
-
         // 페이지 로드 시 실행
         document.addEventListener('DOMContentLoaded', () => {
             checkTranscribeStatus();
-            checkGoogleDriveStatus();
             checkBrowserLoginAvailable();
-            loadNotionUrl();
-            loadInstructors();
         });
 
         // 탭 전환
@@ -3402,9 +2628,6 @@
             originalTranscript = '';
             isTranscriptCorrected = false;
 
-            // 스크립트 상태 초기화
-            generatedScript = '';
-
             // 전사 UI 초기화
             const transcribeContent = document.getElementById('transcribeContent');
             if (transcribeContent) {
@@ -3429,24 +2652,6 @@
             }
 
             // 스크립트 UI 초기화
-            const scriptOutput = document.getElementById('scriptOutput');
-            if (scriptOutput) {
-                scriptOutput.textContent = '스크립트가 여기에 생성됩니다.';
-            }
-
-            // 스크립트 뱃지 초기화
-            const scriptBadge = document.getElementById('scriptBadge');
-            if (scriptBadge) {
-                scriptBadge.textContent = '대기';
-                scriptBadge.style.background = 'rgba(100, 100, 100, 0.3)';
-                scriptBadge.style.color = 'rgba(255, 255, 255, 0.5)';
-            }
-
-            // 강사 이름 초기화
-            const generatedInstructorName = document.getElementById('generatedInstructorName');
-            if (generatedInstructorName) {
-                generatedInstructorName.textContent = '-';
-            }
         }
 
         async function extractVideo() {
@@ -3879,7 +3084,6 @@
 
         async function correctTranscript() {
             const btn = document.getElementById('btnCorrect');
-            const generateBtn = document.getElementById('btnGenerateScript');
 
             // 이미 교정된 상태면 비교 모달 표시
             if (isTranscriptCorrected) {
@@ -3903,13 +3107,6 @@
                 badge.textContent = '교정중';
                 badge.style.background = 'rgba(251, 191, 36, 0.3)';
                 badge.style.color = '#fbbf24';
-            }
-
-            // 교정 중에는 스크립트 생성 버튼 비활성화
-            if (generateBtn) {
-                generateBtn.disabled = true;
-                generateBtn.style.opacity = '0.5';
-                generateBtn.style.cursor = 'not-allowed';
             }
 
             try {
@@ -3965,12 +3162,6 @@
                 }
             } finally {
                 btn.disabled = false;
-                // 스크립트 생성 버튼 다시 활성화
-                if (generateBtn) {
-                    generateBtn.disabled = false;
-                    generateBtn.style.opacity = '1';
-                    generateBtn.style.cursor = 'pointer';
-                }
             }
         }
 
