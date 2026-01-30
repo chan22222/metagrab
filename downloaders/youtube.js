@@ -83,20 +83,38 @@ class YouTubeDownloader {
             // Supabase에서 쿠키 파일 준비
             const cookiesPath = await this.prepareCookiesFile();
 
-            const ytdlpOptions = {
+            const baseOptions = {
                 dumpSingleJson: true,
                 noCheckCertificates: true,
                 noWarnings: true,
-                noCheckFormats: true,
-                preferFreeFormats: true,
             };
 
             if (cookiesPath) {
-                ytdlpOptions.cookies = cookiesPath;
+                baseOptions.cookies = cookiesPath;
                 console.log('[YouTube] 쿠키 사용');
             }
 
-            const info = await ytdlp(videoUrl, ytdlpOptions);
+            // 포맷 에러 대비 재시도 로직
+            let info;
+            const formatAttempts = [
+                {},                        // 기본 (yt-dlp 자동 선택)
+                { format: 'b' },           // best single file
+                { format: '18' },          // 360p mp4 (거의 항상 존재)
+            ];
+
+            for (let i = 0; i < formatAttempts.length; i++) {
+                try {
+                    const options = { ...baseOptions, ...formatAttempts[i] };
+                    if (i > 0) {
+                        console.log(`[YouTube] 재시도 ${i}: format=${formatAttempts[i].format}`);
+                    }
+                    info = await ytdlp(videoUrl, options);
+                    break;
+                } catch (err) {
+                    if (i === formatAttempts.length - 1) throw err;
+                    console.log(`[YouTube] 시도 ${i + 1} 실패: ${err.message?.substring(0, 100)}`);
+                }
+            }
 
             console.log(`[YouTube] 제목: ${info.title}`);
 
