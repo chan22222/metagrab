@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     curl \
     unzip \
+    ca-certificates \
     --no-install-recommends \
     && ln -s /usr/bin/python3 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
