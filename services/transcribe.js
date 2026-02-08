@@ -34,8 +34,9 @@ class TranscribeService {
         const audioPath = path.join(this.tempDir, `audio_${fileId}.mp3`);
         const chunkPaths = [];
 
-        // Instagram 원본 URL 저장 (Puppeteer/yt-dlp fallback용)
+        // 원본 URL 저장 (플랫폼별 fallback용)
         this.originalInstagramUrl = originalUrl;
+        this.originalYouTubeUrl = originalUrl;
 
         try {
             // 로컬 파일인 경우 (광고 비디오 등)
@@ -253,7 +254,34 @@ class TranscribeService {
         throw new Error(finalError);
     }
 
+    async downloadWithYtdlp(videoUrl, filePath) {
+        const ytdlp = require('yt-dlp-exec');
+        const YouTubeDownloader = require('../downloaders/youtube');
+        const yt = new YouTubeDownloader();
+        const cookiesPath = await yt.getCookiesPath();
+
+        const options = {
+            output: filePath,
+            format: 'bestaudio[ext=m4a]/bestaudio/best',
+            noCheckCertificates: true,
+            noWarnings: true,
+        };
+
+        if (cookiesPath) {
+            options.cookies = cookiesPath;
+        }
+
+        await ytdlp(videoUrl, options);
+        console.log('[Transcribe] yt-dlp 다운로드 완료');
+    }
+
     async downloadFile(url, filePath) {
+        // YouTube CDN은 yt-dlp로 다운로드 (서명된 URL 403 우회)
+        if (url.includes('googlevideo.com') || url.includes('youtube.com')) {
+            console.log('[Transcribe] YouTube CDN - yt-dlp로 다운로드...');
+            return this.downloadWithYtdlp(this.originalYouTubeUrl || url, filePath);
+        }
+
         // Facebook CDN은 ffmpeg로 직접 다운로드 (403 우회)
         if (url.includes('fbcdn.net') && !url.includes('cdninstagram.com')) {
             console.log('[Transcribe] Facebook CDN - ffmpeg로 다운로드...');
