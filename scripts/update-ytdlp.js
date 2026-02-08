@@ -4,7 +4,7 @@ const path = require('path');
 
 const binDir = path.join(__dirname, '..', 'node_modules', 'yt-dlp-exec', 'bin');
 const binPath = path.join(binDir, 'yt-dlp');
-const url = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp';
+const url = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux';
 
 function download(url, dest) {
     return new Promise((resolve, reject) => {
