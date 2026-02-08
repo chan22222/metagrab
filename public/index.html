@@ -649,7 +649,8 @@
             margin-bottom: 16px;
         }
 
-        .cookie-input-group input {
+        .cookie-input-group input,
+        .cookie-input-group textarea {
             flex: 1;
             padding: 14px 16px;
             background: rgba(0, 0, 0, 0.4);
@@ -659,14 +660,23 @@
             font-size: 0.9rem;
             outline: none;
             transition: all 0.2s;
+            font-family: inherit;
         }
 
-        .cookie-input-group input:focus {
+        .cookie-input-group textarea {
+            resize: vertical;
+            min-height: 120px;
+            line-height: 1.5;
+        }
+
+        .cookie-input-group input:focus,
+        .cookie-input-group textarea:focus {
             border-color: rgba(228, 64, 95, 0.5);
             box-shadow: 0 0 0 3px rgba(228, 64, 95, 0.1);
         }
 
-        .cookie-input-group input::placeholder {
+        .cookie-input-group input::placeholder,
+        .cookie-input-group textarea::placeholder {
             color: rgba(255, 255, 255, 0.25);
         }
 
@@ -1662,11 +1672,11 @@
             </div>
             <div class="auth-content-wrapper">
                 <div class="auth-card">
-                    <h4>YouTube 쿠키 직접 입력</h4>
-                    <p>브라우저 개발자 도구(F12) &gt; Application &gt; Cookies &gt; youtube.com 에서 전체 쿠키를 복사하세요.</p>
-                    <div class="cookie-input-group">
-                        <input type="text" id="youtubeCookieInput" placeholder="YouTube 쿠키 값을 붙여넣으세요">
-                        <button class="btn-auth-submit" onclick="saveYouTubeCookie()">저장</button>
+                    <h4>YouTube 쿠키 입력 (Netscape 형식)</h4>
+                    <p>Chrome: <a href="https://chromewebstore.google.com/detail/cookie-editor/hlkenndednhfkekhgcdicdfddnkalmdm" target="_blank" style="color: #00d4ff;">Cookie-Editor</a> 확장 프로그램 설치 → YouTube 로그인 → 확장 프로그램 열기 → <strong>Export → Netscape</strong> 형식으로 내보내기 후 붙여넣기</p>
+                    <div class="cookie-input-group" style="flex-direction: column;">
+                        <textarea id="youtubeCookieInput" placeholder="# Netscape HTTP Cookie File&#10;.youtube.com&#9;TRUE&#9;/&#9;TRUE&#9;...&#10;&#10;Netscape 형식의 쿠키를 여기에 붙여넣으세요" rows="6"></textarea>
+                        <button class="btn-auth-submit" onclick="saveYouTubeCookie()" style="align-self: flex-end;">저장</button>
                     </div>
                 </div>
             </div>

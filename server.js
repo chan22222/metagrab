@@ -105,7 +105,14 @@ app.post('/api/extract', async (req, res) => {
 app.get('/api/youtube/cookie/status', async (req, res) => {
     let exists = false;
 
-    if (supabase.enabled) {
+    // 로컬 파일 확인
+    const cookiesPath = path.join(__dirname, 'youtube_cookies.txt');
+    if (fs.existsSync(cookiesPath)) {
+        exists = true;
+    }
+
+    // Supabase 확인
+    if (!exists && supabase.enabled) {
         const session = await supabase.getSession('youtube_cookie');
         if (session) exists = true;
     }
@@ -125,6 +132,10 @@ app.post('/api/youtube/cookie', async (req, res) => {
         if (supabase.enabled) {
             await supabase.setSession('youtube_cookie', cookie);
         }
+
+        // 로컬 파일에도 저장
+        const cookiesPath = path.join(__dirname, 'youtube_cookies.txt');
+        fs.writeFileSync(cookiesPath, cookie, 'utf8');
 
         return res.json({ success: true, message: 'YouTube 쿠키가 저장되었습니다!' });
     } catch (error) {
