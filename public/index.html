@@ -2572,11 +2572,8 @@
                 const data = await response.json();
                 transcribeAvailable = data.available;
 
-                // 전사 버튼 표시/숨김
-                const btnTranscribe = document.getElementById('btnTranscribe');
-                if (btnTranscribe) {
-                    btnTranscribe.style.display = transcribeAvailable ? 'flex' : 'none';
-                }
+                // 전사 가능 상태만 업데이트 (버튼은 항상 표시)
+
             } catch (error) {
                 console.error('전사 상태 확인 실패:', error);
             }
@@ -2648,11 +2645,6 @@
                     document.getElementById('openaiKeyInput').value = '';
                     loadAPIKeys();
                     transcribeAvailable = true;
-
-                    const btnTranscribe = document.getElementById('btnTranscribe');
-                    if (btnTranscribe) {
-                        btnTranscribe.style.display = 'flex';
-                    }
                 } else {
                     showError(data.error || 'API 키 추가에 실패했습니다.');
                 }
